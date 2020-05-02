@@ -33,3 +33,42 @@ app.get('/api/notes', (req, res, next) => {
     .catch(err => { next(err); });
   }
 })
+
+app.post('/api/notes', (req, res, next) => {
+  const allNotes = `insert into notes ("noteName", "note")
+                    values ($1, $2)
+                    returning *`
+  db.query(allNotes) {
+    .then(response => {
+    const notesResponse = response.rows;
+    if (!notesResponse) {
+      next(new ClientError(`No notes found!${req.method} ${req.originalUrl}`, 404));
+    }
+    else {
+      res.json(notesResponse);
+    }
+  })
+      .catch(err => { next(err); });
+  }
+})
+
+app.delete('/api/notes', (req, res, next) => {
+  const allNotes = `delete "noteId" from "notes" where "noteId"=$1`;
+  db.query(allNotes) {
+    .then(response => {
+    const notesResponse = response.rows;
+    if (!notesResponse) {
+      next(new ClientError(`No notes found!${req.method} ${req.originalUrl}`, 404));
+    }
+    else {
+      res.json(notesResponse);
+    }
+  })
+      .catch(err => { next(err); });
+  }
+})
+
+app.listen(process.env.PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log('Listening on port', process.env.PORT);
+});
